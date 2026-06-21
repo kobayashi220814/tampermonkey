@@ -1,0 +1,28 @@
+#!/bin/bash
+# commit 前，自動把有變動的 .user.js 的 @version patch +1
+# 規則：版本號形如 x.y.z，每次自動 +1 最後一碼；沒有 @version 則略過
+
+bumped=()
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  [[ "$f" == *.user.js ]] || continue
+  [ -f "$f" ] || continue
+
+  # 取出目前版本
+  ver=$(grep -oE '@version[[:space:]]+[0-9]+\.[0-9]+\.[0-9]+' "$f" | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+  [ -z "$ver" ] && continue
+
+  IFS='.' read -r major minor patch <<< "$ver"
+  newver="$major.$minor.$((patch+1))"
+
+  # 取代（用 perl 避免 sed 在不同平台的差異）
+  perl -i -pe "s/(\@version\s+)$ver/\${1}$newver/" "$f"
+  git add "$f"
+  bumped+=("$f: $ver -> $newver")
+done < <(git diff --cached --name-only --diff-filter=ACM)
+
+if [ ${#bumped[@]} -gt 0 ]; then
+  echo "已自動更新版本號："
+  printf '  %s\n' "${bumped[@]}"
+fi
+exit 0
