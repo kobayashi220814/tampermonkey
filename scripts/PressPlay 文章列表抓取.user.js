@@ -4,11 +4,15 @@
 // @version      1.0
 // @updateURL    https://raw.githubusercontent.com/kobayashi220814/tampermonkey/main/scripts/PressPlay%20%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E6%8A%93%E5%8F%96.user.js
 // @downloadURL  https://raw.githubusercontent.com/kobayashi220814/tampermonkey/main/scripts/PressPlay%20%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E6%8A%93%E5%8F%96.user.js
-// @match        https://cc.pressplay.cc/*
+// @match        https://cc.pressplay.cc/project/*/content/article
+// @match        https://cc.pressplay.cc/project/*/content/article?*
 // @grant        none
 // ==/UserScript==
 
 (function () {
+    // 只在文章「列表頁」顯示，單篇文章頁（/content/article/<ID>）不顯示
+    if (!/\/content\/article\/?$/.test(location.pathname)) return;
+
     const btn = document.createElement("button");
     btn.textContent = "📋 匯出文章清單";
     btn.style.cssText = "position:fixed;top:10px;right:10px;z-index:9999;padding:8px 14px;background:#4CAF50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;";
