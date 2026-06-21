@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PressPlay 文章列表抓取
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @updateURL    https://raw.githubusercontent.com/kobayashi220814/tampermonkey/main/scripts/PressPlay%20%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E6%8A%93%E5%8F%96.user.js
 // @downloadURL  https://raw.githubusercontent.com/kobayashi220814/tampermonkey/main/scripts/PressPlay%20%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E6%8A%93%E5%8F%96.user.js
 // @match        https://cc.pressplay.cc/project/*/content/article

@@ -1,6 +1,6 @@
 #!/bin/bash
-# commit 前，自動把有變動的 .user.js 的 @version patch +1
-# 規則：版本號形如 x.y.z，每次自動 +1 最後一碼；沒有 @version 則略過
+# commit 前，自動把有變動的 .user.js 的 @version 最後一段數字 +1
+# 支援兩段式（1.2 -> 1.3）與三段式（1.6.0 -> 1.6.1）；沒有 @version 則略過
 
 bumped=()
 while IFS= read -r f; do
@@ -8,15 +8,20 @@ while IFS= read -r f; do
   [[ "$f" == *.user.js ]] || continue
   [ -f "$f" ] || continue
 
-  # 取出目前版本
-  ver=$(grep -oE '@version[[:space:]]+[0-9]+\.[0-9]+\.[0-9]+' "$f" | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+  # 取出目前版本（數字與點組成，至少一段）
+  ver=$(grep -oE '@version[[:space:]]+[0-9][0-9.]*' "$f" | head -1 | grep -oE '[0-9][0-9.]*')
   [ -z "$ver" ] && continue
 
-  IFS='.' read -r major minor patch <<< "$ver"
-  newver="$major.$minor.$((patch+1))"
+  # 把最後一段 +1
+  last="${ver##*.}"
+  if [ "$ver" = "$last" ]; then
+    newver=$((ver + 1))            # 沒有點，純數字
+  else
+    newver="${ver%.*}.$((last + 1))"
+  fi
 
-  # 取代（用 perl 避免 sed 在不同平台的差異）
-  perl -i -pe "s/(\@version\s+)$ver/\${1}$newver/" "$f"
+  # 用 \Q...\E 把舊版本當字面字串取代
+  perl -i -pe "s/(\@version\s+)\Q$ver\E/\${1}$newver/" "$f"
   git add "$f"
   bumped+=("$f: $ver -> $newver")
 done < <(git diff --cached --name-only --diff-filter=ACM)
