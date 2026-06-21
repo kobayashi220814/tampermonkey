@@ -3,7 +3,7 @@
 # 支援兩段式（1.2 -> 1.3）與三段式（1.6.0 -> 1.6.1）；沒有 @version 則略過
 
 bumped=()
-while IFS= read -r f; do
+while IFS= read -r -d '' f; do
   [ -z "$f" ] && continue
   [[ "$f" == *.user.js ]] || continue
   [ -f "$f" ] || continue
@@ -24,7 +24,7 @@ while IFS= read -r f; do
   perl -i -pe "s/(\@version\s+)\Q$ver\E/\${1}$newver/" "$f"
   git add "$f"
   bumped+=("$f: $ver -> $newver")
-done < <(git diff --cached --name-only --diff-filter=ACM)
+done < <(git -c core.quotepath=false diff --cached --name-only -z --diff-filter=ACM)
 
 if [ ${#bumped[@]} -gt 0 ]; then
   echo "已自動更新版本號："
